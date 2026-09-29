@@ -48,8 +48,15 @@ Nincs szükség build lépésre: a `public/` mappa bármilyen statikus tárhelye
   levelezőjében nyit meg egy előre megírt levelet. Nincs űrlap, az oldal semmilyen adatot nem gyűjt és nem küld
 - **Lábléc**: óriási „Zenith” felirat, amin végigsiklik a fény (számítógépen az egeret követi), közösségi linkek
 - Telefonon alul mindig ott az **Útvonal** és a **Hívás** gomb; a menü teljes képernyős
-- Telefonra optimalizálva (320 px-től), legalább 40–44 px-es érintési felületekkel; aki kikapcsolta az animációkat
-  (`prefers-reduced-motion`), annak minden mozdulatlan; a WebGL és a vásznak csak akkor dolgoznak, amikor látszanak
+- Telefonra optimalizálva (320 px-től, fekvő nézetben is):
+  - minden gomb és link legalább 44 px-es érintési felület; a nyitókép címe mindig pontosan két sor
+  - a nyitókép fénye az ujjat követi, Androidon a telefon döntésére is mozdul (mint egy valódi lakkon); a swirl-bemutatón
+    koppintással vagy húzással mozog a lámpa
+  - telefonon kisebb felbontással számol a WebGL és a swirl-vászon, a címsor-eltűnés miatti átméretezés nem számol újra
+  - nincs „beragadt” hover-effekt érintőképernyőn, helyette érintési visszajelzés
+  - az Útvonal/Hívás sáv csak a nyitókép után jelenik meg
+- Aki kikapcsolta az animációkat (`prefers-reduced-motion`), annak minden mozdulatlan; a WebGL és a vásznak csak akkor
+  dolgoznak, amikor látszanak
 - Keresőknek: leírás, megosztási kép, strukturált adat (`AutomotiveBusiness`) a nyitvatartással
 
 ## Tartalom szerkesztése

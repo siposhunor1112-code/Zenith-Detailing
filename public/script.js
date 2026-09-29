@@ -31,6 +31,7 @@ const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+const coarse = window.matchMedia("(pointer: coarse)").matches;
 const desktop = window.matchMedia("(min-width: 901px)");
 const phoneDigits = SHOP.phone ? SHOP.phone.replace(/[^\d+]/g, "") : null;
 
@@ -128,7 +129,7 @@ function onScroll() {
     if (y < lastY - 2) nav.classList.remove("is-hidden");
   }
   lastY = y;
-  dock?.classList.toggle("is-shown", y > window.innerHeight * 0.6);
+  dock?.classList.toggle("is-shown", y > window.innerHeight * 0.92);
 }
 window.addEventListener("scroll", onScroll, { passive: true });
 onScroll();
@@ -290,11 +291,15 @@ void main() {
 
   function resize() {
     const w = canvas.clientWidth, h = canvas.clientHeight;
-    // legfeljebb ~1,6 millió képpont: szép marad, de nem melegíti a laptopot
-    const scale = Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(1.6e6 / Math.max(1, w * h)));
-    canvas.width = Math.round(w * scale);
-    canvas.height = Math.round(h * scale);
-    gl.viewport(0, 0, canvas.width, canvas.height);
+    // legfeljebb ~1,6 millió képpont (telefonon ~0,7 millió): szép marad, de nem melegíti a készüléket
+    const budget = coarse ? 7e5 : 1.6e6;
+    const scale = Math.min(window.devicePixelRatio || 1, coarse ? 1.25 : 1.5, Math.sqrt(budget / Math.max(1, w * h)));
+    const cw = Math.round(w * scale), ch = Math.round(h * scale);
+    // telefonon görgetéskor a címsor miatt jön „resize” – ha a méret nem változott, nincs teendő
+    if (cw === canvas.width && ch === canvas.height) return;
+    canvas.width = cw;
+    canvas.height = ch;
+    gl.viewport(0, 0, cw, ch);
   }
   resize();
   window.addEventListener("resize", resize);
@@ -302,13 +307,25 @@ void main() {
   // a fénycsík: bal oldalról „végigsöpör”, aztán lassan jár, vagy az egeret követi
   const light = { x: -2.4, y: 0.35 };
   const target = { x: 0.3, y: 0.1 };
-  let lastMove = -1e9;
-  if (finePointer) {
-    hero.addEventListener("pointermove", (e) => {
-      const r = hero.getBoundingClientRect();
-      target.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-      target.y = 1 - ((e.clientY - r.top) / r.height) * 2;
-      lastMove = performance.now();
+  let lastMove = -1e9, lastTilt = -1e9;
+  const aim = (cx, cy) => {
+    const r = hero.getBoundingClientRect();
+    target.x = ((cx - r.left) / r.width) * 2 - 1;
+    target.y = 1 - ((cy - r.top) / r.height) * 2;
+    lastMove = performance.now();
+  };
+  if (finePointer) hero.addEventListener("pointermove", (e) => aim(e.clientX, e.clientY));
+  // telefonon a fény az ujjat követi (görgetés közben is)
+  const onTouch = (e) => { const t = e.touches[0]; if (t) aim(t.clientX, t.clientY); };
+  hero.addEventListener("touchstart", onTouch, { passive: true });
+  hero.addEventListener("touchmove", onTouch, { passive: true });
+  // Androidon a telefon döntésére is mozdul, mint a valódi lakkon (iOS-en ehhez engedély kellene, ott kimarad)
+  if (coarse && !reduced && "DeviceOrientationEvent" in window && typeof DeviceOrientationEvent.requestPermission !== "function") {
+    window.addEventListener("deviceorientation", (e) => {
+      if (e.gamma == null || e.beta == null || performance.now() - lastMove < 2500 || !visible) return;
+      target.x = clamp(e.gamma / 30, -1, 1) * 0.9;
+      target.y = clamp((50 - e.beta) / 30, -1, 1) * 0.8;
+      lastTilt = performance.now();
     });
   }
 
@@ -316,7 +333,7 @@ void main() {
   let raf = 0, visible = true;
   function frame(now) {
     const t = (now - start) / 1000;
-    if (now - lastMove > 3500) {
+    if (now - lastMove > 3500 && now - lastTilt > 1500) {
       target.x = 0.25 + Math.sin(t * 0.17) * 0.55;
       target.y = 0.05 + Math.sin(t * 0.23 + 1.3) * 0.3;
     }
@@ -398,9 +415,12 @@ const PAINTS = {
 
   function resize() {
     const r = stage.getBoundingClientRect();
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = canvas.width = Math.round(r.width * dpr);
-    H = canvas.height = Math.round(r.height * dpr);
+    const d = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2);
+    const w = Math.round(r.width * d), h = Math.round(r.height * d);
+    if (w === W && h === H) return;
+    dpr = d;
+    W = canvas.width = w;
+    H = canvas.height = h;
     build();
     dirty = true;
   }
@@ -571,6 +591,7 @@ const PAINTS = {
     next.focus(); next.click();
   });
 
+  if (cue && coarse) cue.textContent = "Koppintson vagy húzza a lámpát";
   resize();
   setSplit(0.5);
   window.addEventListener("resize", () => { resize(); if (reduced) draw(); });
@@ -600,6 +621,7 @@ $$(".svc__row").forEach((row, i) => {
   const sec = $("[data-layers]");
   if (!sec) return;
   const scene = $(".stack__scene", sec);
+  const stickyEl = $(".layers__sticky", sec);
   const plates = $$(".stack__layer", sec);
   const legend = $$("[data-layers-legend] li", sec);
   let hoverIdx = null, current = -1, ticking = false;
@@ -612,7 +634,7 @@ $$(".svc__row").forEach((row, i) => {
     ticking = false;
     const r = sec.getBoundingClientRect();
     const vh = window.innerHeight;
-    const sticky = desktop.matches;
+    const sticky = getComputedStyle(stickyEl).position === "sticky";
     const p = sticky ? clamp(-r.top / (r.height - vh)) : clamp((vh * 0.85 - r.top) / (r.height * 0.9));
     const open = reduced ? 1 : clamp((p - 0.02) / 0.35);
     scene.style.setProperty("--p", (1 - (1 - open) ** 3).toFixed(4));
