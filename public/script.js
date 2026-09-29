@@ -646,6 +646,8 @@ $$(".svc__row").forEach((row, i) => {
     highlight(hoverIdx ?? current);
   }
   const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+  // telefonon lapos keresztmetszet van: nincs mit görgetés közben számolni
+  if (mobileMode) return;
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll);
   legend.forEach((li) => {

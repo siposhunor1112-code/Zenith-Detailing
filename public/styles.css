@@ -45,7 +45,7 @@
   --bg-3: #131316;
   --text: #efeae1;        /* meleg fehér */
   --muted: #8f8a82;
-  --dim: #5d5a55;
+  --dim: #7a766f;
   --line: rgba(239, 234, 225, .09);
   --line-2: rgba(239, 234, 225, .18);
   --accent: #d6bf94;      /* pezsgő – az egyetlen kiemelőszín */
@@ -340,7 +340,9 @@ body::after {
 .layers__sticky { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; align-items: center; overflow: hidden; }
 .layers__grid { display: grid; grid-template-columns: 1fr 1.05fr; gap: 48px; align-items: center; }
 .layers__legend { margin-top: 36px; max-width: 520px; }
-.layers__legend li { display: grid; grid-template-columns: 110px 1fr; gap: 16px; padding: 11px 0; border-top: 1px solid var(--line); color: var(--dim); transition: color .4s; font-size: 14.5px; }
+.layers__legend li { display: grid; grid-template-columns: 110px 1fr; gap: 16px; padding: 11px 0; border-top: 1px solid var(--line); color: var(--muted); transition: color .4s; font-size: 14.5px; }
+.layers__legend li .layers__um { color: var(--dim); }
+.layers__legend li:not(.is-on) .layers__um { transition: color .4s; }
 .layers__legend li:last-child { border-bottom: 1px solid var(--line); }
 .layers__um { font: 500 12px/1.6 var(--mono); letter-spacing: .06em; }
 .layers__legend li.is-on { color: var(--text); }
@@ -652,6 +654,35 @@ body::after {
   }
   .master__big { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: var(--text); }
   .stack__layer:nth-child(5) { backdrop-filter: none; }
+
+  /* Fejléc: mindig ugyanaz a háttér, nincs átmenet görgetéskor, saját rétegen (iPhone-on így nem remeg) */
+  .nav, .nav.is-scrolled {
+    background: linear-gradient(180deg, rgba(6, 6, 7, .96), rgba(6, 6, 7, .9));
+    border-color: var(--line); backdrop-filter: none; -webkit-backdrop-filter: none;
+    transition: none; transform: translateZ(0); -webkit-transform: translateZ(0); will-change: transform;
+  }
+  /* nyitott menünél nincs transform: különben a teljes képernyős menü a fejléc dobozába szorulna */
+  .nav.is-open { background: transparent; border-color: transparent; transform: none; -webkit-transform: none; will-change: auto; }
+
+  /* Rétegek: a 3D-s kép helyett lapos keresztmetszet – a színes sávok maguk a rétegek, mellettük a teljes szöveg */
+  .stack { display: none; }
+  .layers__legend { margin-top: 32px; border: 1px solid var(--line-2); }
+  .layers__legend li, .layers__legend li.is-on {
+    grid-template-columns: 34px 88px 1fr; gap: 0 14px; align-items: center; padding: 0 14px 0 0;
+    color: var(--text); border-top: 1px solid var(--line); font-size: 15px; line-height: 1.35; min-height: 52px;
+  }
+  .layers__legend li:first-child { border-top: 0; }
+  .layers__legend li:last-child { border-bottom: 0; }
+  .layers__legend li::before { content: ""; align-self: stretch; }
+  .layers__legend li > span:last-child { padding-block: 12px; }
+  .layers__legend li .layers__um, .layers__legend li.is-on .layers__um { color: var(--accent); font-size: 11.5px; }
+  .layers__legend li[data-l="5"]::before { background: linear-gradient(180deg, rgba(255, 180, 210, .5), rgba(160, 220, 255, .55), rgba(214, 191, 148, .8)); }
+  .layers__legend li[data-l="4"]::before { background: linear-gradient(90deg, rgba(255, 255, 255, .28), rgba(255, 255, 255, .1)); }
+  .layers__legend li[data-l="3"]::before { background: radial-gradient(rgba(255, 255, 255, .35) .6px, transparent 1px) 0 0 / 6px 6px, #121216; }
+  .layers__legend li[data-l="2"]::before { background: #7d7e80; }
+  .layers__legend li[data-l="1"]::before { background: #2b2d31; }
+  .layers__legend li[data-l="0"]::before { background: linear-gradient(90deg, #4a4c50, #2a2c30); }
+  .layers__legend li[data-l="4"] { background: rgba(214, 191, 148, .06); }
   .stack__layer:nth-child(6) { animation: none; }
   .flow__list li::before { width: 100%; transition: none; }
 }
@@ -676,7 +707,7 @@ body::after {
   .lab__swatches { gap: 8px; }
   .lab__note { flex-basis: 100%; }
   .lab__cue { font-size: 9.5px; letter-spacing: .16em; bottom: 16px; }
-  .contact__mail { display: inline-block; padding-block: 10px; }
+  .contact__mail { display: block; width: fit-content; padding-block: 10px; }
   .contact__phone { padding-top: 4px; }
   .foot__row a { display: inline-block; padding-block: 12px; }
   .foot__row p { line-height: 1.3; }

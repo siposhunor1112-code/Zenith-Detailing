@@ -58,6 +58,11 @@ Nincs szükség build lépésre: a `public/` mappa bármilyen statikus tárhelye
   - telefonon és tableten a szövegek nem úsznak be görgetéskor (azonnal látszanak), a fejléc nem bújik el, és görgetés
     közben nincs drága újrarajzolás (filmszemcse, elmosott háttér, mozgó arany színátmenet) – így nem ugrál és nem akad
   - a lenyíló szolgáltatás-sorokban telefonon egy rövid leírás is látszik nyitás nélkül
+  - a fejléc telefonon mindig ugyanúgy néz ki és egy helyben áll (nincs háttérváltás, átmenet vagy elbújás görgetéskor)
+  - a „Mikronokban mérjük” rész telefonon a 3D-s kép helyett lapos keresztmetszetet mutat: színes sáv = réteg,
+    mellette a vastagság és a név teljes fényerővel (iPhone-on a 3D-s kép rárajzolódhatott a szövegre)
+- A `styles.css` és a `script.js` hivatkozásában verziószám van (`?v=4`): tartalmi módosítás után érdemes növelni, hogy a
+  telefonok biztosan az új változatot töltsék le
 - Aki kikapcsolta az animációkat (`prefers-reduced-motion`), annak minden mozdulatlan; a WebGL és a vásznak csak akkor
   dolgoznak, amikor látszanak
 - Keresőknek: leírás, megosztási kép, strukturált adat (`AutomotiveBusiness`) a nyitvatartással
