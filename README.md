@@ -55,6 +55,9 @@ Nincs szükség build lépésre: a `public/` mappa bármilyen statikus tárhelye
   - telefonon kisebb felbontással számol a WebGL és a swirl-vászon, a címsor-eltűnés miatti átméretezés nem számol újra
   - nincs „beragadt” hover-effekt érintőképernyőn, helyette érintési visszajelzés
   - az Útvonal/Hívás sáv csak a nyitókép után jelenik meg
+  - telefonon és tableten a szövegek nem úsznak be görgetéskor (azonnal látszanak), a fejléc nem bújik el, és görgetés
+    közben nincs drága újrarajzolás (filmszemcse, elmosott háttér, mozgó arany színátmenet) – így nem ugrál és nem akad
+  - a lenyíló szolgáltatás-sorokban telefonon egy rövid leírás is látszik nyitás nélkül
 - Aki kikapcsolta az animációkat (`prefers-reduced-motion`), annak minden mozdulatlan; a WebGL és a vásznak csak akkor
   dolgoznak, amikor látszanak
 - Keresőknek: leírás, megosztási kép, strukturált adat (`AutomotiveBusiness`) a nyitvatartással

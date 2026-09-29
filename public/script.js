@@ -32,6 +32,8 @@ const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 const coarse = window.matchMedia("(pointer: coarse)").matches;
+// Telefonon és tableten: nincs görgetésre beúszó szöveg és elbújó fejléc – minden azonnal látszik, semmi nem ugrál
+const mobileMode = window.matchMedia("(max-width: 900px), (pointer: coarse)").matches;
 const desktop = window.matchMedia("(min-width: 901px)");
 const phoneDigits = SHOP.phone ? SHOP.phone.replace(/[^\d+]/g, "") : null;
 
@@ -124,7 +126,7 @@ function onScroll() {
   const y = window.scrollY;
   nav.classList.toggle("is-scrolled", y > 10);
   // lefelé görgetéskor a fejléc elbújik, felfelé visszajön
-  if (!nav.classList.contains("is-open") && !nav.contains(document.activeElement)) {
+  if (!mobileMode && !nav.classList.contains("is-open") && !nav.contains(document.activeElement)) {
     nav.classList.toggle("is-hidden", y > window.innerHeight * 0.9 && y > lastY + 2);
     if (y < lastY - 2) nav.classList.remove("is-hidden");
   }
@@ -152,10 +154,10 @@ revealEls.forEach((el) => {
   const sibs = [...el.parentElement.children].filter((c) => c.hasAttribute("data-reveal"));
   el.style.setProperty("--k", sibs.indexOf(el));
 });
-if ("IntersectionObserver" in window && !reduced) {
+if ("IntersectionObserver" in window && !reduced && !mobileMode) {
   const io = new IntersectionObserver((entries) => {
     entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("is-in"); io.unobserve(en.target); } });
-  }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+  }, { threshold: 0, rootMargin: "0px 0px -4% 0px" });
   revealEls.forEach((el) => io.observe(el));
 } else {
   revealEls.forEach((el) => el.classList.add("is-in"));
@@ -725,6 +727,8 @@ mapBtn?.addEventListener("click", () => {
     if (now - last > 2500) mark.style.setProperty("--fx", `${50 + Math.sin(now / 2200) * 42}%`);
     if (visible) raf = requestAnimationFrame(frame);
   }
+  // telefonon álló fény: nem rajzolja újra görgetés közben
+  if (mobileMode) { mark.style.setProperty("--fx", "62%"); return; }
   if (reduced || !("IntersectionObserver" in window)) return;
   new IntersectionObserver(([en]) => {
     visible = en.isIntersecting;
